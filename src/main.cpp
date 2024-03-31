@@ -1,22 +1,54 @@
+/*
+ * The sensor is connected to the Arduino with a 10 kOhm pull-up
+ * resistor connected to the data pin.
+ */
+
 #include <Arduino.h>
-#include <DHT.h>
+#include <dht_nonblocking.h>
 
-#define DHTPIN 2      // Define the pin number where your DHT sensor is connected
-#define DHTTYPE DHT11 // Define the type of DHT sensor you're using (DHT11, DHT21, DHT22)
+#define DHT_SENSOR_TYPE DHT_TYPE_11
 
-DHT dht(DHTPIN, DHTTYPE);
+static const int DHT_SENSOR_PIN = 2;
+DHT_nonblocking dht_sensor(DHT_SENSOR_PIN, DHT_SENSOR_TYPE);
 
 void setup()
 {
   Serial.begin(9600);
 }
 
+// Poll for a measurement, keeping the state machine alive.  Returns
+// true if a measurement is available.
+static bool measure_environment(float *temperature, float *humidity)
+{
+  static unsigned long measurement_timestamp = millis();
+
+  /* Measure once every four seconds. */
+  if (millis() - measurement_timestamp > 3000ul)
+  {
+    if (dht_sensor.measure(temperature, humidity) == true)
+    {
+      measurement_timestamp = millis();
+      return (true);
+    }
+  }
+
+  return (false);
+}
+
+// Main loop
 void loop()
 {
-  int chk = dht.read();
-  Serial.print("Temperature = ");
-  Serial.println(dht.readTemperature());
-  Serial.print("Humidity: ");
-  Serial.println(dht.readHumidity());
-  delay(1000);
+  float temperature;
+  float humidity;
+
+  /* Measure temperature and humidity.  If the functions returns
+     true, then a measurement is available. */
+  if (measure_environment(&temperature, &humidity) == true)
+  {
+    Serial.print("T = ");
+    Serial.print(temperature, 1);
+    Serial.print(" deg. C, H = ");
+    Serial.print(humidity, 1);
+    Serial.println("%");
+  }
 }
