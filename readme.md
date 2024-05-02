@@ -4,7 +4,7 @@ This project combines an Arduino microcontroller with a DHT sensor to collect te
 
 ## Quick Note
 
-- Please note the server setup is in a different [repository]((https://github.com/Mevan-Solanga/TemperatureLogger-Frontend))
+- Please note the server setup is in a different [repository](https://github.com/Mevan-Solanga/TemperatureLogger-Frontend)
 
 ## Features
 
